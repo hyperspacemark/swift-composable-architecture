@@ -99,7 +99,7 @@ private enum MyValue: DependencyKey {
   static let testValue = 0
 }
 extension DependencyValues {
-  var myValue: Int {
+  fileprivate var myValue: Int {
     get { self[MyValue.self] }
     set { self[MyValue.self] = newValue }
   }
