@@ -113,7 +113,7 @@ public struct DependencyValues: Sendable {
 
         switch context {
         case .live:
-          guard let value = _liveValue(Key.self) as? Key.Value
+          guard let liveValue = _liveValue(Key.self)
           else {
             if !Self.isSetting {
               runtimeWarning(
@@ -130,8 +130,8 @@ public struct DependencyValues: Sendable {
                 that conformance must be visible to the running application.
 
                 To fix, make sure that '%@' conforms to 'DependencyKey' by providing a live \
-                implementation of your dependency, and make sure that the conformance is linked with \
-                this current application.
+                implementation of your dependency, and make sure that the conformance is linked \
+                with this current application.
                 """,
                 [
                   "\(fileID)",
@@ -146,7 +146,43 @@ public struct DependencyValues: Sendable {
             }
             return Key.testValue
           }
-          return value
+          print(liveValue)
+          print(Key.testValue)
+
+          func cast<T>(_ value: Any, as type: T.Type) -> T? {
+            value as? T
+          }
+
+          print(Key.testValue)
+            
+
+          guard let liveValue = cast(liveValue, as: type(of: Key.testValue))
+          else {
+            runtimeWarning(
+              """
+              The type of liveValue does not match testValue.
+
+                Key:
+                  %@
+                Dependency:
+                  %@
+
+              The type of the liveValue for %@ is %@, which differs from the type of testValue, \
+              %@.
+              """,
+              [
+                typeName(Key.self),
+                typeName(Key.Value.self),
+                typeName(Key.self),
+                typeName(Key.Value.self),
+                typeName(type(of: Key.testValue))
+              ],
+              file: file,
+              line: line
+            )
+            return Key.testValue
+          }
+          return liveValue
         case .preview:
           return Key.previewValue
         case .test:
